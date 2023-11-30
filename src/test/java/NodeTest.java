@@ -37,21 +37,21 @@ public class NodeTest {
                     rng
             );
             root.insert(new Body<>(mass, 10, 10, 1));
-            Body<Integer> result = root.getRandomBody(0, 0);
+            Body<Integer> result = root.getRandomBody(0, 0, 0.5);
             assertNotNull(result);
             assertTrue(List.of(0, 1).contains(result.value));
             assertEquals(mass, result.mass);
         }
 
         @Test
-        void returnsNonNullWhenHalfwayBetweenTwoEqualMassBodiesRngReturnsNear100pct() {
+        void returnsValidValueWhenHalfwayBetweenTwoEqualMassBodiesRngReturnsNear100pct() {
             // Random.nextDouble returns a number in [0.0,1.0), so just get as close to 1.0 as possible
             // Largest number <1.0 in 64-bit IEEE754 is 1.0-2^-53, which is roughly the number given below
             doTestHalfwayBetweenTwoEqualMassBodies(0.9999999999999998889);
         }
 
         @Test
-        void returnsNonNullWhenHalfwayBetweenTwoEqualMassBodiesRngReturns0pct() {
+        void returnsValidValueWhenHalfwayBetweenTwoEqualMassBodiesRngReturns0pct() {
             doTestHalfwayBetweenTwoEqualMassBodies(0.0);
         }
 
@@ -67,7 +67,7 @@ public class NodeTest {
                     new Square(0, 0, 10)
             );
             List.of(nw, se, sw).forEach(node::insert);
-            Body<Integer> result = node.getRandomBody(-2, -2);
+            Body<Integer> result = node.getRandomBody(-2, -2, 0.5);
             assertEquals(3, result.value);
             assertEquals(-1, result.x);
             assertEquals(-1, result.y);
@@ -87,7 +87,7 @@ public class NodeTest {
                     new Square(0, 0, 1000)
             );
             List.of(ne2, nw, se, sw).forEach(node::insert);
-            Body<Integer> result = node.getRandomBody(-400, -200);
+            Body<Integer> result = node.getRandomBody(-400, -200, 0.5);
             assertEquals(4, result.value);
             assertEquals(0.001, result.x);
             assertEquals(0.002, result.y);
@@ -95,38 +95,44 @@ public class NodeTest {
         }
 
         @Test
-        void testReturnsNonNullWhenZeroMassCumPassed() {
+        void testReturnsNodeBodyWhenNoOthersExist() {
             Body<Integer> body = new Body<>(100, 1, 1, 1);
             Node<Integer> node = new Node<>(
                     body,
                     new Square(0, 0, 10)
             );
-            Body<Integer> result = node.getRandomBody(10, 10, new Body<>(0, 0, 0, 0), 0.5);
-            assertNotNull(result);
+            Body<Integer> result = node.getRandomBody(10, 10, 0.5);
             assertEquals(body, result);
         }
 
         @Test
-        void testReturnsNullWhenBodyHasZeroMass() {
-            Body<Integer> cum = new Body<>(100, 10, 10, 10);
+        void testReturnsOtherWhenBodyHasZeroMass() {
+            Body<Integer> other = new Body<>(100, 10, 10, 10);
             Node<Integer> node = new Node<>(
                     new Body<>(0, 0, 0, 0),
                     new Square(0, 0, 100)
             );
-            Body<Integer> result = node.getRandomBody(5, 5, cum, 0.5);
-            assertNull(result);
+            node.insert(other);
+            Body<Integer> result = node.getRandomBody(5, 5, 0.5);
+            assertEquals(other, result);
         }
 
         @Test
         void testThrowsWhenZeroMassTotal() {
-            Body<Integer> cum = new Body<>(0, 10, 10, 10);
+            List<Body<Integer>> others = List.of(
+                    new Body<>(0, 10, 10, 10),
+                    new Body<>(0, -1, -1, -1),
+                    new Body<>(0, -11, -1, -1),
+                    new Body<>(0, -105, -100, -1)
+            );
             Node<Integer> node = new Node<>(
                     new Body<>(0, 0, 0, 0),
-                    new Square(0, 0, 100)
+                    new Square(0, 0, 1000)
             );
+            others.forEach(node::insert);
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> node.getRandomBody(5, 5, cum, 0.5)
+                    () -> node.getRandomBody(1, 10, 0.5)
             );
         }
     }

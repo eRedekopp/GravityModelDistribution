@@ -1,24 +1,81 @@
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * The only real function in Body is 'plus' so this only tests that, probably more thoroughly than necessary
- */
 public class BodyTest {
 
     static final Body<Object> ORIGIN_EMPTY = new Body<>(0, 0, 0, null);
 
-    private void doOneTest(double expectedX, double expectedY, double expectedMass, Body<Object> a, Body<Object> b) {
-        Body<Object> result = a.plus(b);
-        assertEquals(expectedX, result.x);
-        assertEquals(expectedY, result.y);
-        assertEquals(expectedMass, result.mass);
-        assertNull(result.value);
+    @Nested
+    class TestDistanceTo {
+        @Test
+        void testZeroDistanceAtOrigin() {
+            assertEquals(0, ORIGIN_EMPTY.distanceTo(ORIGIN_EMPTY));
+        }
+
+        @Test
+        void testZeroDistanceAtOtherPoint() {
+            Body<Object> body = new Body<>(10, 100, -100, new Object());
+            assertEquals(0, body.distanceTo(body));
+            assertEquals(0, body.distanceTo(body.plus(ORIGIN_EMPTY)));
+        }
+
+        @Test
+        void testLongerDistanceAlongXAxis() {
+            double distance = 1000;
+            Body<Object> body = new Body<>(10, distance, 0, new Object());
+            assertEquals(distance, body.distanceTo(ORIGIN_EMPTY));
+            assertEquals(distance, ORIGIN_EMPTY.distanceTo(body));
+        }
+
+        @Test
+        void testLongerDistanceAlongYAxis() {
+            double distance = 50000;
+            Body<Object> body = new Body<>(10, 0, distance, new Object());
+            assertEquals(distance, body.distanceTo(ORIGIN_EMPTY));
+            assertEquals(distance, ORIGIN_EMPTY.distanceTo(body));
+        }
+
+        @Test
+        void testOriginToOtherPoint() {
+            Body<Object> body = new Body<>(10, 10, -10, new Object());
+            double distance = Math.sqrt(200);
+            assertEquals(distance, body.distanceTo(ORIGIN_EMPTY));
+            assertEquals(distance, ORIGIN_EMPTY.distanceTo(body));
+        }
+
+        @Test
+        void testTwoPointsInSameQuadrant() {
+            Body<Object> body1 = new Body<>(10, -10, -100, new Object());
+            Body<Object> body2 = new Body<>(10, -100, -190, new Object());
+            double distance = Math.sqrt(2 * 90 * 90);
+            assertEquals(distance, body1.distanceTo(body2));
+            assertEquals(distance, body2.distanceTo(body1));
+        }
+
+        @Test
+        void testTwoPointsInDifferentQuadrants() {
+            Body<Object> body1 = new Body<>(10, -210, 100, new Object());
+            Body<Object> body2 = new Body<>(10, 105, -1900, new Object());
+            double distance = Math.sqrt(315 * 315 + 2000 * 2000);
+            assertEquals(distance, body1.distanceTo(body2));
+            assertEquals(distance, body2.distanceTo(body1));
+        }
     }
 
     @Nested
-    class TestPlusNonZero {
+    class TestPlus {
+        private void doOneTest(double expectedX, double expectedY, double expectedMass, Body<Object> a, Body<Object> b) {
+            Body<Object> result = a.plus(b);
+            assertEquals(expectedX, result.x);
+            assertEquals(expectedY, result.y);
+            assertEquals(expectedMass, result.mass);
+            assertNull(result.value);
+        }
+
         @Test
         void testAddBothIn1stQuadrant() {
             double mass1 = 100, x1 = 500, y1 = 21, mass2 = 300, x2 = 30, y2 = 300;
@@ -74,10 +131,7 @@ public class BodyTest {
             Body<Object> body2 = new Body<>(mass2, x, y, new Object());
             doOneTest(x, y, 4000,  body1, body2);
         }
-    }
 
-    @Nested
-    class TestAddZero {
         @Test
         void testZeroBodyPlusZeroBodyEqualsZero() {
             doOneTest(0, 0, 0, ORIGIN_EMPTY, ORIGIN_EMPTY);
@@ -109,84 +163,29 @@ public class BodyTest {
     @Nested
     class TestIllegalArguments {
 
-        @Test
-        void testThrowsExceptionForNegativeMass() {
+        private void doInvalidArgsTest(double mass, double x, double y) {
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> new Body<Object>(-1, 10, 200, new Object())
+                    () -> new Body<>(mass, x, y, new Object())
             );
         }
 
-        @Test
-        void testThrowsExceptionForNegativeInfiniteMass() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(Double.NEGATIVE_INFINITY, 10, 200, new Object())
-            );
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNAndNegativeDoubleArgsProvider.class)
+        void testThrowsForInvalidMass(double mass) {
+            doInvalidArgsTest(mass, 100, -100);
         }
 
-        @Test
-        void testThrowsExceptionForInfiniteMass() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(Double.POSITIVE_INFINITY, 10, 200, new Object())
-            );
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testThrowsForInvalidX(double x) {
+            doInvalidArgsTest(120, x, 100);
         }
 
-        @Test
-        void testThrowsExceptionForNaNMass() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(Double.NaN, 10, 200, new Object())
-            );
-        }
-
-        @Test
-        void testThrowsExceptionForInfiniteX() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(1000, Double.POSITIVE_INFINITY, 200, new Object())
-            );
-        }
-
-        @Test
-        void testThrowsExceptionForInfiniteY() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(1000, 200, Double.POSITIVE_INFINITY, new Object())
-            );
-        }
-
-        @Test
-        void testThrowsExceptionForNegativeInfiniteX() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(1000, Double.NEGATIVE_INFINITY, 200, new Object())
-            );
-        }
-
-        @Test
-        void testThrowsExceptionForNegativeInfiniteY() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(1000, 200, Double.NEGATIVE_INFINITY, new Object())
-            );
-        }
-
-        @Test
-        void testThrowsExceptionForNaNX() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(1000, Double.NaN, 200, new Object())
-            );
-        }
-
-        @Test
-        void testThrowsExceptionForNaNY() {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Body<Object>(1000, 200, Double.NaN, new Object())
-            );
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testThrowsForInvalidY(double y) {
+            doInvalidArgsTest(120, 100, y);
         }
     }
 }

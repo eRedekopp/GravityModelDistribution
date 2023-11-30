@@ -57,6 +57,16 @@ public class Body<T> {
         );
     }
 
+    public double distanceTo(Body<T> other) {
+        return this.distanceTo(other.x, other.y);
+    }
+
+    public double distanceTo(double x, double y) {
+        double dx = x - this.x;
+        double dy = y - this.y;
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+
     @Override
     public String toString() {
         return "Body{" +

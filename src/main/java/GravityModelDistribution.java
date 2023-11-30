@@ -4,6 +4,8 @@ public class GravityModelDistribution<T> {
 
     private final Node<T> root;
 
+    private final double theta;
+
     /**
      * @param bodies The bodies to be inserted into the tree
      * @param theta The threshold value for when nodes are considered "far enough" to be considered as a combined
@@ -14,7 +16,11 @@ public class GravityModelDistribution<T> {
         if (bodies.isEmpty()) {
             throw new IllegalArgumentException("No bodies");
         }
+        if (theta < 0 || Double.isNaN(theta) || Double.isInfinite(theta)) {
+            throw new IllegalArgumentException("Invalid theta: " + theta);
+        }
 
+        this.theta = theta;
         Square bounds = this.getBoundingSquare(bodies);
         this.root = new Node<>(bodies.get(0), bounds);
         for (Body<T> b: bodies.subList(1, bodies.size())) {
@@ -28,7 +34,13 @@ public class GravityModelDistribution<T> {
      * @return A random body weighted by the amount of gravity that each body exerts on the reference point
      */
     public Body<T> getRandomBody(double x, double y) {
-        return this.root.getRandomBody(x, y);
+        if (isInvalidDoubleArg(x)) throw new IllegalArgumentException("Invalid x: " + x);
+        if (isInvalidDoubleArg(y)) throw new IllegalArgumentException("Invalid y: " + y);
+        return this.root.getRandomBody(x, y, this.theta);
+    }
+
+    private boolean isInvalidDoubleArg(double arg) {
+        return Double.isInfinite(arg) || Double.isNaN(arg);
     }
 
     private Square getBoundingSquare(List<Body<T>> bodies) {

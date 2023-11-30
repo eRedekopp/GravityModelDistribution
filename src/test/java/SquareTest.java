@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -175,108 +177,70 @@ public class SquareTest {
 
     @Nested
     class TestIllegalArguments {
-        @Test
-        void testConstructor() {
+
+        private void doConstructorTest(double x, double y, double sideLength) {
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> new Square(0, 0, -0.5)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(0, 0, Double.POSITIVE_INFINITY)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(0, 0, Double.NEGATIVE_INFINITY)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(0, 0, Double.NaN)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(Double.NEGATIVE_INFINITY, 0, 100)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(Double.POSITIVE_INFINITY, 0, 100)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(Double.NaN, 0, 100)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(0,  Double.NEGATIVE_INFINITY, 100)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(0, Double.POSITIVE_INFINITY, 100)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new Square(0, Double.NaN, 100)
+                    () -> new Square(x, y, sideLength)
             );
         }
 
-        @Test
-        void testContains() {
-            Square square = new Square(0, 0, 10);
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testConstructorThrowsForInvalidX(double x) {
+            doConstructorTest(x, 10.0, 10);
+        }
 
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testConstructorThrowsForInvalidY(double y) {
+            doConstructorTest(-10.5, y, 100);
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNAndNegativeDoubleArgsProvider.class)
+        void testConstructorThrowsForInvalidSideLen(double sideLen) {
+            doConstructorTest(-10.0, 10.0, sideLen);
+        }
+
+        private void doContainsTest(double x, double y) {
+            Square square = new Square(0, 0, 10);
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> square.contains(Double.POSITIVE_INFINITY, 0)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.contains(Double.NEGATIVE_INFINITY, 0)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.contains(Double.NaN, 0)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.contains(0, Double.POSITIVE_INFINITY)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.contains(0, Double.NEGATIVE_INFINITY)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.contains(0, Double.NaN)
+                    () -> square.contains(x, y)
             );
         }
 
-        @Test
-        void testGetQuadrant() {
-            Square square = new Square(0, 0, 10);
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testContainsThrowsForInvalidX(double x) {
+            doContainsTest(x, -100.15);
+        }
 
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testContainsThrowsForInvalidY(double y) {
+            doContainsTest(100.01, y);
+        }
+
+        private void doGetQuadrantTest(double x, double y) {
+            Square square = new Square(10, 10, 100);
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> square.getQuadrant(Double.POSITIVE_INFINITY, 0)
+                    () -> square.getQuadrant(x, y)
             );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.getQuadrant(Double.NEGATIVE_INFINITY, 0)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.getQuadrant(Double.NaN, 0)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.getQuadrant(0, Double.POSITIVE_INFINITY)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.getQuadrant(0, Double.NEGATIVE_INFINITY)
-            );
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> square.getQuadrant(0, Double.NaN)
-            );
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testGetQuadrantThrowsForInvalidX(double x) {
+            doGetQuadrantTest(x, -211.12);
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testGetQuadrantThrowsForInvalidY(double y) {
+            doGetQuadrantTest(-123.456, y);
         }
     }
 }
