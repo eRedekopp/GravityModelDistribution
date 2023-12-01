@@ -67,6 +67,17 @@ public class Body<T> {
         return Math.sqrt(dx*dx + dy*dy);
     }
 
+    /**
+     * Compute the amount of gravity (with G factored out) that this body exerts on a point
+     * mass centred at (x,y)
+     */
+    public double computeGravityWeight(double x, double y) {
+        if (this.mass == 0) return 0.0;
+        double r = this.distanceTo(x, y);
+        if (r == 0) r = 1; // TODO does this make sense?
+        return this.mass / (r*r);
+    }
+
     @Override
     public String toString() {
         return "Body{" +

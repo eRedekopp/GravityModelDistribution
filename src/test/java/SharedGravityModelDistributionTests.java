@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,15 +9,17 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GravityModelDistributionTest {
+public abstract class SharedGravityModelDistributionTests {
 
-    private static final int NUM_ITERATIONS = (int) 1E6;
+    protected static final int NUM_ITERATIONS = (int) 1E6;
 
-    private static final double EPSILON = 0.001;
+    protected static final double EPSILON = 0.001;
 
-    Map<Integer, Double> performIterations(List<Body<Integer>> bodies, double x, double y, double theta) {
+    protected abstract <T> GravityModelDistribution<T> makeDistribution(List<Body<T>> bodies);
+
+    Map<Integer, Double> performIterations(List<Body<Integer>> bodies, double x, double y) {
         // GMD is threadsafe so we can do these in parallel
-        GravityModelDistribution<Integer> dist = new GravityModelDistribution<>(bodies, theta);
+        GravityModelDistribution<Integer> dist = this.makeDistribution(bodies);
         return IntStream
                 .range(0, NUM_ITERATIONS)
                 .parallel()
@@ -36,8 +37,7 @@ public class GravityModelDistributionTest {
         Map<Integer, Double> percentages = performIterations(
                 List.of(new Body<>(10, 0, 0, 0)),
                 1,
-                1,
-                0.5
+                1
         );
         assertEquals(1, percentages.size());
         assertNotNull(percentages.get(0));
@@ -52,8 +52,7 @@ public class GravityModelDistributionTest {
                         new Body<>(1000, 10, 10, 1)
                 ),
                 0,
-                0,
-                0.5
+                0
         );
         assertEquals(2, percentages.size());
         for (int i : List.of(0, 1)) {
@@ -72,8 +71,7 @@ public class GravityModelDistributionTest {
                         new Body<>(50, -10, -10, 3)
                 ),
                 0,
-                0,
-                0.1
+                0
         );
         assertEquals(4, percentages.size());
         for (int i : List.of(0, 1, 2, 3)) {
@@ -88,7 +86,7 @@ public class GravityModelDistributionTest {
     }
 
     @Test
-    void testConvergesToEvenProbabilitiesForPointsAroundCircleWithRefAtCentreAndZeroTheta() {
+    void testConvergesToEvenProbabilitiesForPointsAroundCircleWithRefAtCentre() {
         double mass = 10000;
         double radius = 1000;
         double refX = -350, refY = 210;
@@ -103,7 +101,7 @@ public class GravityModelDistributionTest {
             bodies.add(new Body<>(mass, x, y, i));
         }
 
-        Map<Integer, Double> percentages = performIterations(bodies, refX, refY, 0.0);
+        Map<Integer, Double> percentages = performIterations(bodies, refX, refY);
         for (double p : percentages.values()) {
             assertEquals(1.0 / numBodies, p, EPSILON);
         }
@@ -144,7 +142,7 @@ public class GravityModelDistributionTest {
         );
 
         @Test
-        void testReferencePointAtOriginConvergesToExpectedValueWithZeroTheta() {
+        void testReferencePointAtOriginConvergesToExpectedValue() {
             double[] gravityValues = {
                     // southwest cluster
                     0.004999999999999999,
@@ -175,36 +173,18 @@ public class GravityModelDistributionTest {
             double sumForces = Arrays.stream(gravityValues).reduce(0, Double::sum);
             double[] normedForces = Arrays.stream(gravityValues).map(d -> d / sumForces).toArray();
 
-            Map<Integer, Double> percentages = performIterations(bodies, 0, 0, 0.0);
+            Map<Integer, Double> percentages = performIterations(bodies, 0, 0);
             for (int i = 0; i < percentages.size(); i++) {
                 assertEquals(normedForces[i], percentages.get(i), EPSILON);
             }
         }
     }
+
     @Nested
-    class TestInvalidArguments {
-        private final Body<Object> A_BODY = new Body<>(10, 0, 0, new Object());
-
-        private void doTestForConstructorArgs(List<Body<Object>> bodies, double theta) {
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> new GravityModelDistribution<>(bodies, theta)
-            );
-        }
-
-        @Test
-        void testConstructorThrowsForEmptyBodies() {
-            doTestForConstructorArgs(List.of(), 0.5);
-        }
-
-        @ParameterizedTest
-        @ArgumentsSource(InfiniteAndNaNAndNegativeDoubleArgsProvider.class)
-        void testConstructorThrowsForInvalidTheta(double theta) {
-            doTestForConstructorArgs(List.of(A_BODY), theta);
-        }
-
+    class TestInvalidRandomBodyArguments {
         private void doRandomBodyTest(double x, double y) {
-            GravityModelDistribution<Object> dist = new GravityModelDistribution<>(List.of(A_BODY), 0.1);
+            GravityModelDistribution<Object> dist =
+                    makeDistribution(List.of(new Body<>(10, 0, 0, new Object())));
             assertThrows(
                     IllegalArgumentException.class,
                     () -> dist.getRandomBody(x, y)

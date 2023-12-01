@@ -1,4 +1,4 @@
-public enum Quadrant {
+enum Quadrant {
     NORTHWEST,
     NORTHEAST,
     SOUTHWEST,

@@ -2,17 +2,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * The nodes that make up the quadtree or a subtree thereof. To extend this class, override the computeGravityWeight
- * and makeNewNode functions, and define your own custom subclass of Body
- * @param <T> The type of data stored in the Bodies used in this node
- */
-public class Node<T> {
-
-    /**
-     * A Body with zero mass that exerts no gravitational force
-     */
-    private final Body<T> EMPTY_BODY = new Body<>(0, 0, 0, null);
+class Node<T> {
 
     /**
      * The child nodes of this node, if they exist.
@@ -107,66 +97,12 @@ public class Node<T> {
         }
     }
 
-    /**
-     * Choose a random node from the list weighted by their gravity on point (x,y). This is implemented
-     * by designating certain ranges within [0,1] as belonging to each node based on their weight. Whichever one of
-     * these ranges `rand` falls into is the node that is returned.
-     *
-     * <p/>
-     * For example:
-     * <tt>
-     * [[_____n1_____][__n2__][____________n3____________]]
-     * 0========================.5========================1
-     * </tt>
-     * <ul>
-     *     <li>Rand = 0.1 -> return n1</li>
-     *     <li>Rand = 0.4 -> return n2</li>
-     *     <li>Rand = 0.7 -> return n3</li>
-     * </ul>
-     *
-     * @param x The x value of the reference point
-     * @param y The y value of the reference point
-     * @param candidates The nodes being considered
-     * @param rand A uniform random double in [0,1)
-     * @return A randomly selected node weighted by each one's gravity on (x,y)
-     */
     private Node<T> chooseRandomGravityWeightedNode(double x, double y, List<Node<T>> candidates, double rand) {
-        List<Double> forces = candidates.stream()
-                .map(b -> this.computeGravityWeight(x, y, b.body))
-                .collect(Collectors.toUnmodifiableList());
-        double sumForces = forces.stream().reduce(Double::sum).orElseThrow();
-        if (sumForces == 0) throw new IllegalArgumentException("No candidates produce any force on the given point");
-        List<Double> normalizedForces = forces.stream()
-                .map(f -> f / sumForces)
-                .collect(Collectors.toUnmodifiableList());
-        List<Double> cumSum = this.cumSum(normalizedForces);
-        for (int i = 0; i < cumSum.size(); i++) {
-            if (rand < cumSum.get(i)) {
-                return candidates.get(i);
-            }
-        }
-        throw new RuntimeException("Did not select a random node -- this should be unreachable");
-    }
-
-    private List<Double> cumSum(List<Double> list) {
-        List<Double> out = new ArrayList<>(list.size());
-        double cumSum = 0;
-        for (double d : list) {
-            cumSum += d;
-            out.add(cumSum);
-        }
-        return out;
-    }
-
-    /**
-     * Compute the amount of gravity (with G factored out) that the given body exerts on a point
-     * mass centred at (x,y)
-     */
-    protected double computeGravityWeight(double x, double y, Body<T> body) {
-        if (body.mass == 0) return 0.0;
-        double r = body.distanceTo(x, y);
-        if (r == 0) r = 1; // TODO does this make sense?
-        return body.mass / (r*r);
+        double[] forces = candidates.stream()
+                .mapToDouble(b -> b.body.computeGravityWeight(x, y))
+                .toArray();
+        int i = Utils.chooseRandomIndexByWeight(forces,  rand);
+        return candidates.get(i);
     }
 
     /**

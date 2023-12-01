@@ -163,7 +163,7 @@ public class BodyTest {
     @Nested
     class TestIllegalArguments {
 
-        private void doInvalidArgsTest(double mass, double x, double y) {
+        private void doInvalidConstructorArgsTest(double mass, double x, double y) {
             assertThrows(
                     IllegalArgumentException.class,
                     () -> new Body<>(mass, x, y, new Object())
@@ -172,20 +172,39 @@ public class BodyTest {
 
         @ParameterizedTest
         @ArgumentsSource(InfiniteAndNaNAndNegativeDoubleArgsProvider.class)
-        void testThrowsForInvalidMass(double mass) {
-            doInvalidArgsTest(mass, 100, -100);
+        void testConstructorThrowsForInvalidMass(double mass) {
+            doInvalidConstructorArgsTest(mass, 100, -100);
         }
 
         @ParameterizedTest
         @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
-        void testThrowsForInvalidX(double x) {
-            doInvalidArgsTest(120, x, 100);
+        void testConstructorThrowsForInvalidX(double x) {
+            doInvalidConstructorArgsTest(120, x, 100);
         }
 
         @ParameterizedTest
         @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
-        void testThrowsForInvalidY(double y) {
-            doInvalidArgsTest(120, 100, y);
+        void testConstructorThrowsForInvalidY(double y) {
+            doInvalidConstructorArgsTest(120, 100, y);
+        }
+
+        private void doInvalidComputeGravityArgsTest(double x, double y) {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> new Body<>(100, 0, 0, new Object()).computeGravityWeight(x, y)
+            );
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testComputeGravityThrowsForInvalidX(double x) {
+            doInvalidComputeGravityArgsTest(x, 100);
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
+        void testComputeGravityThrowsForInvalidY(double y) {
+            doInvalidComputeGravityArgsTest(100, y);
         }
     }
 }

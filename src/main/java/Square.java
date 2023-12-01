@@ -1,4 +1,4 @@
-public class Square {
+class Square {
 
     /**
      * X value of the middle of the square
