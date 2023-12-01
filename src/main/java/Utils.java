@@ -45,11 +45,20 @@ class Utils {
                 .map(f -> f / sum)
                 .toArray();
         double[] cumSum = cumSum(normalized);
-        for (int i = 0; i < cumSum.length; i++) {
-            if (rand < cumSum[i]) {
-                return i;
-            }
+        int idx = Arrays.binarySearch(cumSum, rand);
+        // Arrays.binarySearch is a little unusual. If it returns >= 0, that means we found a value exactly matching
+        // our random number. This is unlikely but possible. If this happens, we need to go forward until we find an
+        // index strictly greater than rand.
+        if (idx >= 0) {
+            while (cumSum[idx] == rand) idx++;
+            return idx;
         }
-        throw new RuntimeException("Did not select a value. This should be unreachable");
+        // If binarySearch returns < 0, that means it didn't find an exact match and instead returned the index
+        // where it would be inserted in the array if we were to do that (i.e. returns the index of the first number
+        // in the array that is greater than rand) times -1, then subtracts 1 from that number to avoid ambiguity with
+        // index 0. So, for example, if the desired index is 2 it would return (-2 - 1) = -3.
+        else {
+            return -1 * idx - 1;
+        }
     }
 }
