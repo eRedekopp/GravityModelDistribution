@@ -11,6 +11,21 @@ public class Body2DTest {
 
     @Nested
     class TestComputeGravity {
+
+        @Test
+        void testReturns0WhenSameBody() {
+            Body2D<Object> body = new Body2D<>(1, 100, 100, new Object());
+            assertEquals(0.0, body.computeGravForce(body));
+        }
+
+        @Test
+        void testReturns0WhenBodyInSameLocation() {
+            Body2D<Object> b1 = new Body2D<>(1000, 50, 100, new Object());
+            Body2D<Object> b2 = new Body2D<>(5555, 50, 100, new Object());
+            assertEquals(0.0, b1.computeGravForce(b2));
+            assertEquals(0.0, b2.computeGravForce(b1));
+        }
+
         @Test
         void testReturns1WhenTwoBodiesHave1MassAnd1UnitApart() {
             Body2D<Object> b1 = new Body2D<>(1, 1, 0, new Object());
@@ -46,7 +61,7 @@ public class Body2DTest {
 
         @Test
         void testReturnsCorrectValueForPointsInSameQuadrant() {
-            double expectedForce = 785.6742013;
+            double expectedForce = 6.1728395061728385;
             Body2D<Object> b1 = new Body2D<>(100, 100, 100, new Object());
             Body2D<Object> b2 = new Body2D<>(1000, 10, 10, new Object());
             assertEquals(expectedForce, b1.computeGravForce(b2));
@@ -55,7 +70,7 @@ public class Body2DTest {
 
         @Test
         void testReturnsCorrectValueForPointsInDifferentQuadrants() {
-            double expectedForce = 785.6742013;
+            double expectedForce = 6.1728395061728385;
             Body2D<Object> b1 = new Body2D<>(100, 1, -1, new Object());
             Body2D<Object> b2 = new Body2D<>(1000, -89, -91, new Object());
             assertEquals(expectedForce, b1.computeGravForce(b2));
