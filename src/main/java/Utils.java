@@ -1,8 +1,10 @@
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 class Utils {
+
+    public static boolean isInvalidArg(double arg) {
+        return Double.isInfinite(arg) || Double.isNaN(arg);
+    }
 
     public static double[] cumSum(double[] arr) {
         double[] out = new double[arr.length];
@@ -50,5 +52,4 @@ class Utils {
         }
         throw new RuntimeException("Did not select a value. This should be unreachable");
     }
-
 }

@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class QuadtreeGravityModelDistribution<T> extends GravityModelDistribution<T> {
+public class QuadtreeGravityModelDistribution<T> implements GravityModelDistribution<T, Body2D<T>> {
 
     private final Node<T> root;
 
@@ -12,35 +12,28 @@ public class QuadtreeGravityModelDistribution<T> extends GravityModelDistributio
      *              unit rather than considering each body individually. Smaller theta is more accurate but more
      *              computationally intensive, and vice versa
      */
-    public QuadtreeGravityModelDistribution(List<Body<T>> bodies, double theta) {
+    public QuadtreeGravityModelDistribution(List<Body2D<T>> bodies, double theta) {
         if (bodies.isEmpty()) {
             throw new IllegalArgumentException("No bodies");
         }
-        if (theta < 0 || this.isInvalidDoubleArg(theta)) {
+        if (theta < 0 || Utils.isInvalidArg(theta)) {
             throw new IllegalArgumentException("Invalid theta: " + theta);
         }
 
         this.theta = theta;
         Square bounds = this.getBoundingSquare(bodies);
         this.root = new Node<>(bodies.get(0), bounds);
-        for (Body<T> b: bodies.subList(1, bodies.size())) {
+        for (Body2D<T> b: bodies.subList(1, bodies.size())) {
             this.root.insert(b);
         }
     }
 
-    /**
-     * @param x The x coordinate of the reference point
-     * @param y The y coordinate of the reference point
-     * @return A random body weighted by the amount of gravity that each body exerts on the reference point
-     */
     @Override
-    public Body<T> getRandomBody(double x, double y) {
-        if (this.isInvalidDoubleArg(x)) throw new IllegalArgumentException("Invalid x: " + x);
-        if (this.isInvalidDoubleArg(y)) throw new IllegalArgumentException("Invalid y: " + y);
-        return this.root.getRandomBody(x, y, this.theta);
+    public Body2D<T> getRandomBody(Body2D<T> ref) {
+        return this.root.getRandomBody(ref.x, ref.y, this.theta);
     }
 
-    private Square getBoundingSquare(List<Body<T>> bodies) {
+    private Square getBoundingSquare(List<Body2D<T>> bodies) {
         double minX = bodies.stream().map(b -> b.x).min(Double::compare).orElseThrow();
         double maxX = bodies.stream().map(b -> b.x).max(Double::compare).orElseThrow();
         double minY = bodies.stream().map(b -> b.y).min(Double::compare).orElseThrow();

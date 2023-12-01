@@ -13,7 +13,7 @@ class Node<T> {
      * A Body representing the centre of mass of the entire subtree headed at this node. If this is a leaf node,
      * the Body will contain a T containing the value associated with the body, otherwise it is null
      */
-    private Body<T> body;
+    private Body2D<T> body;
 
     /**
      * The RNG used for getRandomBody
@@ -30,7 +30,7 @@ class Node<T> {
      *             After subsequent additions, the Body contained in this node will be the accumulation of many bodies.
      * @param area The area represented by this node and its entire subtree
      */
-    public Node(Body<T> body, Square area) {
+    public Node(Body2D<T> body, Square area) {
         this(body, area, new Random());
     }
 
@@ -40,7 +40,7 @@ class Node<T> {
      * @param area The area represented by this node and its entire subtree
      * @param rng The RNG for use in getRandomBody
      */
-    public Node(Body<T> body, Square area, Random rng) {
+    public Node(Body2D<T> body, Square area, Random rng) {
         if (body == null) throw new IllegalArgumentException("Null body");
         if (area == null) throw new IllegalArgumentException("Null area");
         if (!area.contains(body.x, body.y)) throw new IllegalArgumentException(
@@ -58,7 +58,7 @@ class Node<T> {
     /**
      * @return A body representing the centre of mass of the entire subtree headed at this node
      */
-    public Body<T> getCentreMass() {
+    public Body2D<T> getCentreMass() {
         return this.body;
     }
 
@@ -71,7 +71,7 @@ class Node<T> {
      * @param theta A tunable parameter deciding the balance between performance and accuracy. Smaller theta is more
      *              accurate and larger theta is more performant.
      */
-    public Body<T> getRandomBody(double x, double y, double theta) {
+    public Body2D<T> getRandomBody(double x, double y, double theta) {
         Node<T> selected = this;
         double rand = this.rng.nextDouble();
         do {
@@ -98,8 +98,9 @@ class Node<T> {
     }
 
     private Node<T> chooseRandomGravityWeightedNode(double x, double y, List<Node<T>> candidates, double rand) {
+        Body2D<T> ref = new Body2D<>(1, x, y, null);
         double[] forces = candidates.stream()
-                .mapToDouble(b -> b.body.computeGravityWeight(x, y))
+                .mapToDouble(b -> b.body.computeGravForce(ref))
                 .toArray();
         int i = Utils.chooseRandomIndexByWeight(forces,  rand);
         return candidates.get(i);
@@ -108,7 +109,7 @@ class Node<T> {
     /**
      * Insert a Body into the subtree headed at this node.
      */
-    public void insert(Body<T> b) {
+    public void insert(Body2D<T> b) {
         // If this is a leaf node, then our Body actually contains a real value.
         // Insert that Body into the subtree first and then insert b.
         if (this.isLeafNode()) {
@@ -128,7 +129,7 @@ class Node<T> {
     /**
      * Add a body into the appropriate child node given its location
      */
-    private void putBody(Body<T> b) {
+    private void putBody(Body2D<T> b) {
         Quadrant quadrant = this.area.getQuadrant(b.x, b.y);
         if (!this.children.containsKey(quadrant)) {
             this.children.put(quadrant, this.makeNewNode(b, this.area.getSubSquare(quadrant)));
@@ -138,7 +139,7 @@ class Node<T> {
         }
     }
 
-    protected Node<T> makeNewNode(Body<T> body, Square area) {
+    protected Node<T> makeNewNode(Body2D<T> body, Square area) {
         return new Node<>(body, area, this.rng);
     }
 

@@ -1,7 +1,5 @@
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,21 +7,22 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class SharedGravityModelDistributionTests {
+public abstract class Shared2DGravityModelDistributionTests {
 
-    protected static final int NUM_ITERATIONS = (int) 1E6;
+    protected static final int NUM_ITERATIONS = (int) 1E7;
 
     protected static final double EPSILON = 0.001;
 
-    protected abstract <T> GravityModelDistribution<T> makeDistribution(List<Body<T>> bodies);
+    protected abstract <T> GravityModelDistribution<T, Body2D<T>> makeDistribution(List<Body2D<T>> bodies);
 
-    Map<Integer, Double> performIterations(List<Body<Integer>> bodies, double x, double y) {
+    Map<Integer, Double> performIterations(List<Body2D<Integer>> bodies, double x, double y) {
         // GMD is threadsafe so we can do these in parallel
-        GravityModelDistribution<Integer> dist = this.makeDistribution(bodies);
+        GravityModelDistribution<Integer, Body2D<Integer>> dist = this.makeDistribution(bodies);
+        final Body2D<Integer> ref = new Body2D<>(1, x, y, -1);
         return IntStream
                 .range(0, NUM_ITERATIONS)
                 .parallel()
-                .map(i -> dist.getRandomBody(x, y).value)
+                .map(i -> dist.getRandomBody(ref).value)
                 .boxed()
                 .collect(Collectors.groupingByConcurrent(i -> i, Collectors.counting()))
                 .entrySet()
@@ -35,7 +34,7 @@ public abstract class SharedGravityModelDistributionTests {
     @Test
     void testReturnsOnlyItemWhenOnlyOne() {
         Map<Integer, Double> percentages = performIterations(
-                List.of(new Body<>(10, 0, 0, 0)),
+                List.of(new Body2D<>(10, 0, 0, 0)),
                 1,
                 1
         );
@@ -48,8 +47,8 @@ public abstract class SharedGravityModelDistributionTests {
     void testConvergesToEvenProbabilitiesForPointHalfwayBetweenTwoBodiesOfSameMass() {
         Map<Integer, Double> percentages = performIterations(
                 List.of(
-                        new Body<>(1000, -10, -10, 0),
-                        new Body<>(1000, 10, 10, 1)
+                        new Body2D<>(1000, -10, -10, 0),
+                        new Body2D<>(1000, 10, 10, 1)
                 ),
                 0,
                 0
@@ -65,10 +64,10 @@ public abstract class SharedGravityModelDistributionTests {
     void testConvergesToEvenProbabilitiesForMiddleOfSquareWithEqualMassesOnCorners() {
         Map<Integer, Double> percentages = performIterations(
                 List.of(
-                        new Body<>(50, 10, 10, 0),
-                        new Body<>(50, 10, -10, 1),
-                        new Body<>(50, -10, 10, 2),
-                        new Body<>(50, -10, -10, 3)
+                        new Body2D<>(50, 10, 10, 0),
+                        new Body2D<>(50, 10, -10, 1),
+                        new Body2D<>(50, -10, 10, 2),
+                        new Body2D<>(50, -10, -10, 3)
                 ),
                 0,
                 0
@@ -92,13 +91,13 @@ public abstract class SharedGravityModelDistributionTests {
         double refX = -350, refY = 210;
         int numBodies = 1000;
         double angleIncr = 360.0 / numBodies;
-        List<Body<Integer>> bodies = new ArrayList<>(numBodies);
+        List<Body2D<Integer>> bodies = new ArrayList<>(numBodies);
         // Create N bodies around the radius of a circle centred at our reference point
         for (int i = 0; i < numBodies; i++) {
             double angleRads = i * angleIncr * Math.PI / 180;
             double x = refX + Math.cos(angleRads) * radius;
             double y = refY + Math.sin(angleRads) * radius;
-            bodies.add(new Body<>(mass, x, y, i));
+            bodies.add(new Body2D<>(mass, x, y, i));
         }
 
         Map<Integer, Double> percentages = performIterations(bodies, refX, refY);
@@ -113,32 +112,32 @@ public abstract class SharedGravityModelDistributionTests {
         // The tree has 20 bodies total, with a cluster in each quadrant and a few extra bodies scattered
         // throughout. You'll have to calculate the gravity for all 20 bodies on each reference point tested
         // which will be a little bit painful
-        private final List<Body<Integer>> bodies = List.of(
+        private final List<Body2D<Integer>> bodies = List.of(
                         // Southwest cluster
-                        new Body<>(2500, -500, -500, 0),
-                        new Body<>(3000, -550, -500, 1),
-                        new Body<>(3200, -550, -550, 2),
-                        new Body<>(1000, -600, -600, 3),
-                        new Body<>(100, -450, -450, 4),
+                        new Body2D<>(2500, -500, -500, 0),
+                        new Body2D<>(3000, -550, -500, 1),
+                        new Body2D<>(3200, -550, -550, 2),
+                        new Body2D<>(1000, -600, -600, 3),
+                        new Body2D<>(100, -450, -450, 4),
                         // Northwest cluster
-                        new Body<>(1200, -1000, 1100, 5),
-                        new Body<>(10, -900, 900, 6),
-                        new Body<>(5000, -1000, 1000, 7),
-                        new Body<>(3200, -1100, 950, 8),
+                        new Body2D<>(1200, -1000, 1100, 5),
+                        new Body2D<>(10, -900, 900, 6),
+                        new Body2D<>(5000, -1000, 1000, 7),
+                        new Body2D<>(3200, -1100, 950, 8),
                         // Northeast cluster
-                        new Body<>(1000, 50, 50, 9),
-                        new Body<>(800, 51, 51, 10),
-                        new Body<>(1200, 75, 60, 11),
-                        new Body<>(1100, 70, 45, 12),
-                        new Body<>(120, 45, 45, 13),
+                        new Body2D<>(1000, 50, 50, 9),
+                        new Body2D<>(800, 51, 51, 10),
+                        new Body2D<>(1200, 75, 60, 11),
+                        new Body2D<>(1100, 70, 45, 12),
+                        new Body2D<>(120, 45, 45, 13),
                         // Southeast cluster
-                        new Body<>(1000, 700, -500, 14),
-                        new Body<>(2000, 700, -510, 15),
-                        new Body<>(3000, 750, -600, 16),
+                        new Body2D<>(1000, 700, -500, 14),
+                        new Body2D<>(2000, 700, -510, 15),
+                        new Body2D<>(3000, 750, -600, 16),
                         // Extras
-                        new Body<>(10000, 10000, -5000, 17),
-                        new Body<>(2, 0, 6, 18),
-                        new Body<>(500, 360, -200, 19)
+                        new Body2D<>(10000, 10000, -5000, 17),
+                        new Body2D<>(2, 0, 6, 18),
+                        new Body2D<>(500, 360, -200, 19)
         );
 
         @Test
@@ -177,30 +176,6 @@ public abstract class SharedGravityModelDistributionTests {
             for (int i = 0; i < percentages.size(); i++) {
                 assertEquals(normedForces[i], percentages.get(i), EPSILON);
             }
-        }
-    }
-
-    @Nested
-    class TestInvalidRandomBodyArguments {
-        private void doRandomBodyTest(double x, double y) {
-            GravityModelDistribution<Object> dist =
-                    makeDistribution(List.of(new Body<>(10, 0, 0, new Object())));
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> dist.getRandomBody(x, y)
-            );
-        }
-
-        @ParameterizedTest
-        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
-        void testRandomBodyThrowsForInvalidX(double x) {
-            doRandomBodyTest(x, 10.0);
-        }
-
-        @ParameterizedTest
-        @ArgumentsSource(InfiniteAndNaNDoubleArgsProvider.class)
-        void testRandomBodyThrowsForInvalidY(double y) {
-            doRandomBodyTest(20.0, y);
         }
     }
 }

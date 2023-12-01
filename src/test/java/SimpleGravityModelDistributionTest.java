@@ -3,9 +3,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class SimpleGravityModelDistributionTest extends SharedGravityModelDistributionTests {
+public class SimpleGravityModelDistributionTest extends Shared2DGravityModelDistributionTests {
     @Override
-    protected <T> GravityModelDistribution<T> makeDistribution(List<Body<T>> bodies) {
+    protected <T> GravityModelDistribution<T, Body2D<T>> makeDistribution(List<Body2D<T>> bodies) {
         return new SimpleGravityModelDistribution<>(bodies);
     }
 

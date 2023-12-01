@@ -12,7 +12,7 @@ public class NodeTest {
 
     // Makes the children visible
     private static class TestNode<T> extends Node<T> {
-        public TestNode(Body<T> body, Square area) {
+        public TestNode(Body2D<T> body, Square area) {
             super(body, area);
         }
 
@@ -20,7 +20,7 @@ public class NodeTest {
             return this.children;
         }
 
-        protected TestNode<T> makeNewNode(Body<T> body, Square square) {
+        protected TestNode<T> makeNewNode(Body2D<T> body, Square square) {
             return new TestNode<>(body, square);
         }
     }
@@ -32,12 +32,12 @@ public class NodeTest {
             Mockito.when(rng.nextDouble()).thenReturn(randDouble);
             double mass = 1000;
             Node<Integer> root = new Node<>(
-                    new Body<>(mass, -10, -10, 0),
+                    new Body2D<>(mass, -10, -10, 0),
                     new Square(0, 0, 100),
                     rng
             );
-            root.insert(new Body<>(mass, 10, 10, 1));
-            Body<Integer> result = root.getRandomBody(0, 0, 0.5);
+            root.insert(new Body2D<>(mass, 10, 10, 1));
+            Body2D<Integer> result = root.getRandomBody(0, 0, 0.5);
             assertNotNull(result);
             assertTrue(List.of(0, 1).contains(result.value));
             assertEquals(mass, result.mass);
@@ -58,16 +58,16 @@ public class NodeTest {
         @Test
         void testReturnsOnlyNonZeroChildWhenOnlyOneExistsAndPointInSameQuad() {
             // Only sw has any mass and depth is only 1, reference point is in same quad as sw
-            Body<Integer> ne = new Body<>(0, 1, 1, 0);
-            Body<Integer> nw = new Body<>(0, -1, 1, 1);
-            Body<Integer> se = new Body<>(0, 1, -1, 2);
-            Body<Integer> sw = new Body<>(1, -1, -1, 3);
+            Body2D<Integer> ne = new Body2D<>(0, 1, 1, 0);
+            Body2D<Integer> nw = new Body2D<>(0, -1, 1, 1);
+            Body2D<Integer> se = new Body2D<>(0, 1, -1, 2);
+            Body2D<Integer> sw = new Body2D<>(1, -1, -1, 3);
             Node<Integer> node = new Node<>(
                     ne,
                     new Square(0, 0, 10)
             );
             List.of(nw, se, sw).forEach(node::insert);
-            Body<Integer> result = node.getRandomBody(-2, -2, 0.5);
+            Body2D<Integer> result = node.getRandomBody(-2, -2, 0.5);
             assertEquals(3, result.value);
             assertEquals(-1, result.x);
             assertEquals(-1, result.y);
@@ -77,17 +77,17 @@ public class NodeTest {
         @Test
         void testReturnsOnlyNonZeroChildWhenOnlyOneExistsAndPointInDifferentQuad() {
             // Only ne2 has any mass but depth is deeper. Reference point is in a totally different quad
-            Body<Integer> ne1 = new Body<>(0, 1, 1, 0);
-            Body<Integer> ne2 = new Body<>(10, 0.001, 0.002, 4);
-            Body<Integer> nw = new Body<>(0, -1, 1, 1);
-            Body<Integer> se = new Body<>(0, 1, -1, 2);
-            Body<Integer> sw = new Body<>(0, -1, -1, 3);
+            Body2D<Integer> ne1 = new Body2D<>(0, 1, 1, 0);
+            Body2D<Integer> ne2 = new Body2D<>(10, 0.001, 0.002, 4);
+            Body2D<Integer> nw = new Body2D<>(0, -1, 1, 1);
+            Body2D<Integer> se = new Body2D<>(0, 1, -1, 2);
+            Body2D<Integer> sw = new Body2D<>(0, -1, -1, 3);
             Node<Integer> node = new Node<>(
                     ne1,
                     new Square(0, 0, 1000)
             );
             List.of(ne2, nw, se, sw).forEach(node::insert);
-            Body<Integer> result = node.getRandomBody(-400, -200, 0.5);
+            Body2D<Integer> result = node.getRandomBody(-400, -200, 0.5);
             assertEquals(4, result.value);
             assertEquals(0.001, result.x);
             assertEquals(0.002, result.y);
@@ -96,37 +96,37 @@ public class NodeTest {
 
         @Test
         void testReturnsNodeBodyWhenNoOthersExist() {
-            Body<Integer> body = new Body<>(100, 1, 1, 1);
+            Body2D<Integer> body = new Body2D<>(100, 1, 1, 1);
             Node<Integer> node = new Node<>(
                     body,
                     new Square(0, 0, 10)
             );
-            Body<Integer> result = node.getRandomBody(10, 10, 0.5);
+            Body2D<Integer> result = node.getRandomBody(10, 10, 0.5);
             assertEquals(body, result);
         }
 
         @Test
         void testReturnsOtherWhenBodyHasZeroMass() {
-            Body<Integer> other = new Body<>(100, 10, 10, 10);
+            Body2D<Integer> other = new Body2D<>(100, 10, 10, 10);
             Node<Integer> node = new Node<>(
-                    new Body<>(0, 0, 0, 0),
+                    new Body2D<>(0, 0, 0, 0),
                     new Square(0, 0, 100)
             );
             node.insert(other);
-            Body<Integer> result = node.getRandomBody(5, 5, 0.5);
+            Body2D<Integer> result = node.getRandomBody(5, 5, 0.5);
             assertEquals(other, result);
         }
 
         @Test
         void testThrowsWhenZeroMassTotal() {
-            List<Body<Integer>> others = List.of(
-                    new Body<>(0, 10, 10, 10),
-                    new Body<>(0, -1, -1, -1),
-                    new Body<>(0, -11, -1, -1),
-                    new Body<>(0, -105, -100, -1)
+            List<Body2D<Integer>> others = List.of(
+                    new Body2D<>(0, 10, 10, 10),
+                    new Body2D<>(0, -1, -1, -1),
+                    new Body2D<>(0, -11, -1, -1),
+                    new Body2D<>(0, -105, -100, -1)
             );
             Node<Integer> node = new Node<>(
-                    new Body<>(0, 0, 0, 0),
+                    new Body2D<>(0, 0, 0, 0),
                     new Square(0, 0, 1000)
             );
             others.forEach(node::insert);
@@ -142,7 +142,7 @@ public class NodeTest {
         @Test
         void testNewNodeStartsAtCorrectInitialState() {
             TestNode<Integer> node = new TestNode<>(
-                    new Body<>(100, 10, 10, 1),
+                    new Body2D<>(100, 10, 10, 1),
                     new Square(1, 1, 100)
             );
             assertEquals(10, node.getCentreMass().x);
@@ -168,7 +168,7 @@ public class NodeTest {
             assertThrows(
                     IllegalArgumentException.class,
                     () -> new Node<>(
-                            new Body<>(1000, 10, 10, new Object()),
+                            new Body2D<>(1000, 10, 10, new Object()),
                             null
                     )
             );
@@ -179,7 +179,7 @@ public class NodeTest {
             assertThrows(
                     IllegalArgumentException.class,
                     () -> new Node<>(
-                            new Body<>(1000, 10, 10, new Object()),
+                            new Body2D<>(1000, 10, 10, new Object()),
                             new Square(0, 0, 0.5)
                     )
             );
@@ -191,24 +191,24 @@ public class NodeTest {
         @Test
         void testThrowsIfBodyOutOfRange() {
             TestNode<Integer> root = new TestNode<>(
-                    new Body<>(1000, 100, 100, 0),
+                    new Body2D<>(1000, 100, 100, 0),
                     new Square(0, 0, 300)
             );
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> root.insert(new Body<>(100, -1000, -1000, 1))
+                    () -> root.insert(new Body2D<>(100, -1000, -1000, 1))
             );
         }
 
         @Test
         void testThrowsIfIdenticalLocations() {
             TestNode<Integer> root = new TestNode<>(
-                    new Body<>(1000, 100, 100, 0),
+                    new Body2D<>(1000, 100, 100, 0),
                     new Square(0, 0, 300)
             );
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> root.insert(new Body<>(100, 100, 100, 1))
+                    () -> root.insert(new Body2D<>(100, 100, 100, 1))
             );
         }
 
@@ -221,10 +221,10 @@ public class NodeTest {
             double[] xs = {-100, -100};
             double[] ys = {98, -100};
             TestNode<Integer> root = new TestNode<>(
-                    new Body<>(masses[0], xs[0], ys[0], 0),
+                    new Body2D<>(masses[0], xs[0], ys[0], 0),
                     new Square(-1, -1, 200)
             );
-            root.insert(new Body<>(masses[1], xs[1], ys[1], 1));
+            root.insert(new Body2D<>(masses[1], xs[1], ys[1], 1));
 
             // Make sure the original node has updated correctly
             assertEquals(masses[0] + masses[1], root.getCentreMass().mass);
@@ -257,10 +257,10 @@ public class NodeTest {
             double[] xs = {199, 101};
             double[] ys = {1, 99};
             TestNode<Integer> root = new TestNode<>(
-                    new Body<>(masses[0], xs[0], ys[0], 0),
+                    new Body2D<>(masses[0], xs[0], ys[0], 0),
                     new Square(100, 100, 200)
             );
-            root.insert(new Body<>(masses[1], xs[1], ys[1], 1));
+            root.insert(new Body2D<>(masses[1], xs[1], ys[1], 1));
 
             // Make sure the original node has updated correctly
             assertEquals(masses[0] + masses[1], root.getCentreMass().mass);
@@ -307,10 +307,10 @@ public class NodeTest {
             double combinedCentreMassX = (xs[0] * masses[0] + xs[1] * masses[1]) / (masses[0] + masses[1]);
             double combinedCentreMassY = (ys[0] * masses[0] + ys[1] * masses[1]) / (masses[0] + masses[1]);
             TestNode<Integer> root = new TestNode<>(
-                    new Body<>(masses[0], xs[0], ys[0], 0),
+                    new Body2D<>(masses[0], xs[0], ys[0], 0),
                     new Square(0, 0, 1000)
             );
-            root.insert(new Body<>(masses[1], xs[1], ys[1], 1));
+            root.insert(new Body2D<>(masses[1], xs[1], ys[1], 1));
             assertNotNull(root);
             assertEquals(masses[0] + masses[1], root.getCentreMass().mass);
             assertNull(root.getCentreMass().value);
@@ -362,7 +362,7 @@ public class NodeTest {
 
             // Create the root node in the northeast corner of the total area
             TestNode<Integer> root = new TestNode<>(
-                    new Body<>(masses[0], 1, 1, 0),
+                    new Body2D<>(masses[0], 1, 1, 0),
                     new Square(0, 0, 1000)
             );
             assertEquals(masses[0], root.getCentreMass().mass);
@@ -373,7 +373,7 @@ public class NodeTest {
 
             // Add a new node in the northwest corner. This should result in the initial Body being
             // inserted into the northeast quadrant and the new one into the northwest quadrant
-            root.insert(new Body<>(masses[1], -100, 100, 1));
+            root.insert(new Body2D<>(masses[1], -100, 100, 1));
             assertEquals(masses[0] + masses[1], root.getCentreMass().mass);
             assertNull(root.getCentreMass().value);
             assertEquals(2, root.getChildren().size());
@@ -391,7 +391,7 @@ public class NodeTest {
             // Add another node into the northeast corner of the northeast corner. This should result in the
             // original node going into the southwest quadrant and the new node going northeast. Also make
             // sure that nothing else changes
-            root.insert(new Body<>(masses[2], 400, 400, 2));
+            root.insert(new Body2D<>(masses[2], 400, 400, 2));
             assertEquals(masses[0] + masses[1] + masses[2], root.getCentreMass().mass);
             assertNull(root.getCentreMass().value);
             assertEquals(2, root.getChildren().size());
@@ -414,7 +414,7 @@ public class NodeTest {
             assertEquals(1, nwCorner1.getCentreMass().value);
 
             // Add a node into the southwest corner. Make sure it's added correctly and nothing else changes
-            root.insert(new Body<>(masses[3], -1, -1, 3));
+            root.insert(new Body2D<>(masses[3], -1, -1, 3));
             assertEquals(masses[0] + masses[1] + masses[2] + masses[3], root.getCentreMass().mass);
             assertNull(root.getCentreMass().value);
             assertEquals(3, root.getChildren().size());
@@ -441,7 +441,7 @@ public class NodeTest {
             assertEquals(1, nwCorner1.getCentreMass().value);
 
             // Add a node into the southeast corner. Make sure it's added correctly and nothing else changes
-            root.insert(new Body<>(masses[4], 200, -350, 4));
+            root.insert(new Body2D<>(masses[4], 200, -350, 4));
             assertEquals(masses[0] + masses[1] + masses[2] + masses[3] + masses[4], root.getCentreMass().mass);
             assertNull(root.getCentreMass().value);
             assertEquals(4, root.getChildren().size());
@@ -475,7 +475,7 @@ public class NodeTest {
             // node of the northeast node splitting twice, its original node going into the southwest corner, the new node
             // going into the northeast corner, and nothing else changing at the higher levels except the weight of the
             // inner nodes
-            root.insert(new Body<>(masses[5], 450, 450, 5));
+            root.insert(new Body2D<>(masses[5], 450, 450, 5));
             assertEquals(
                     masses[0] + masses[1] + masses[2] + masses[3] + masses[4] + masses[5],
                     root.getCentreMass().mass
