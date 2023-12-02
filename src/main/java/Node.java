@@ -84,7 +84,9 @@ class Node<T> {
 
     private List<Node<T>> getCandidateNodes(double x, double y, double theta) {
         // This node is either a leaf, or the combined centre of mass is far enough that we consider it all together
-        if (this.isLeafNode() || (this.area.sideLength / this.body.distanceTo(x, y)) < theta) {
+        if (this.isLeafNode()
+                || (this.area.sideLength / this.body.distanceTo(new Body2D<>(1, x, y, null))) < theta
+        ) {
             return List.of(this);
         }
         else {

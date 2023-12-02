@@ -1,9 +1,4 @@
-public class Body2D<T> implements Body<T> {
-
-    /**
-     * The mass of this Body, in whichever units are being used
-     */
-    public final double mass;
+public class Body2D<T> extends Body<T> {
 
     /**
      * The X value of this body's centre of mass
@@ -15,10 +10,6 @@ public class Body2D<T> implements Body<T> {
      */
     public final double y;
 
-    /**
-     * The value which this Body represents
-     */
-    public final T value;
 
     /**
      * @param mass The mass of this body
@@ -27,14 +18,12 @@ public class Body2D<T> implements Body<T> {
      * @param value The value which this body represents
      */
     public Body2D(double mass, double x, double y, T value) {
-        if (mass < 0 || Utils.isInvalidArg(mass)) throw new IllegalArgumentException("Illegal mass " + mass);
+        super(mass, value);
         if (Utils.isInvalidArg(x)) throw new IllegalArgumentException("Illegal x " + x);
         if (Utils.isInvalidArg(y)) throw new IllegalArgumentException("Illegal y " + y);
 
-        this.mass = mass;
         this.x = x;
         this.y = y;
-        this.value = value;
     }
 
 
@@ -63,24 +52,9 @@ public class Body2D<T> implements Body<T> {
             throw new IllegalArgumentException("Cannot compute distance to Body type: " + other.getClass());
         }
         Body2D<T> o = ((Body2D<T>) other);
-        return this.distanceTo(o.x, o.y);
-    }
-
-    public double distanceTo(double x, double y) {
-        double dx = x - this.x;
-        double dy = y - this.y;
+        double dx = o.x - this.x;
+        double dy = o.y - this.y;
         return Math.sqrt(dx*dx + dy*dy);
-    }
-
-    public double computeGravForce(Body<T> other) {
-        if (!(other instanceof Body2D)) {
-            throw new IllegalArgumentException("Cannot compute force on Body type: " + other.getClass());
-        }
-        Body2D<T> o = ((Body2D<T>) other);
-        if (this.mass == 0 || o.mass == 0) return 0.0;
-        double r = this.distanceTo(o.x, o.y);
-        if (r == 0) return 0;
-        return this.mass * o.mass / (r*r);
     }
 
     @Override
