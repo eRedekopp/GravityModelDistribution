@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 public class Body3D<T> extends Body<T> {
 
     public final double x;

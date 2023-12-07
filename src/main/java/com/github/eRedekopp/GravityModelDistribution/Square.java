@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 class Square {
 
     /**

@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 import java.util.Arrays;
 
 class Utils {

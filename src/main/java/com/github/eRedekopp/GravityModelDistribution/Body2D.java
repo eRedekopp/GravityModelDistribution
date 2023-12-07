@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 public class Body2D<T> extends Body<T> {
 
     /**

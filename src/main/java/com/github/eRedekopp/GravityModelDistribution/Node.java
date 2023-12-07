@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

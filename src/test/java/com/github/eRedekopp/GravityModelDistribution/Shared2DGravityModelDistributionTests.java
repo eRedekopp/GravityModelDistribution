@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

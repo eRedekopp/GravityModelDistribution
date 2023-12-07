@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 import java.util.List;
 
 public class QuadtreeGravityModelDistribution<T> implements GravityModelDistribution<T, Body2D<T>> {

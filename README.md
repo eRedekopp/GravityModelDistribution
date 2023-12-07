@@ -27,3 +27,23 @@ perform better with a large number of bodies. Due to the nature of Quadtrees, th
 So far, test results have been disappointing and it has served as a poor approximation of the distribution unless the parameter theta 
 is effectively zero. The performance tends to be far worse than SimpleGravityModelDistribution in all cases tested, and it is highly
 recommended to avoid this implementation.
+
+## Sample Code
+This code creates bodies on each corner of a square centred on (0, 0) with side length 10 with values of 0, 1, 2, and 3; 
+and masses of 0, 100, 200, and 300, respectively. It then queries the distribution for a point at the centre (0, 0). 
+The resulting distribution is a weighted discrete uniform distribution with probabilities [0, 1/6, 1/3, 1/2], but will change 
+if queried for a different point.
+
+```
+    public static void main(String[] args) {
+        List<Body2D<Integer>> bodies = List.of(
+                new Body2D<>(0, -10, 10, 0),
+                new Body2D<>(100, 10, -10, 1),
+                new Body2D<>(200, 10, 10, 2),
+                new Body2D<>(300, -10, -10, 3)
+        );
+        Body2D<Integer> ref = new Body2D<>(1.0, 0, 0, null);
+        GravityModelDistribution<Integer, Body2D<Integer>> dist = new SimpleGravityModelDistribution<>(bodies);
+        Body2D<Integer> rand = dist.getRandomBody(ref);
+    }
+```

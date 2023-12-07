@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 import java.util.List;
 import java.util.Random;
 
@@ -15,6 +17,7 @@ public class SimpleGravityModelDistribution<T, B extends Body<T>> implements Gra
 
     @Override
     public B getRandomBody(B ref) {
+        if (ref.mass == 0) throw new IllegalArgumentException("Reference point cannot have 0 mass");
         double[] forces = this.bodies.parallelStream()
                 .mapToDouble(b -> b.computeGravForce(ref))
                 .toArray();

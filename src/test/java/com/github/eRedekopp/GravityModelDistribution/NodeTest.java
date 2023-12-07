@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -231,7 +233,7 @@ public class NodeTest {
             assertNull(root.getCentreMass().value);
             assertEquals(2, root.getChildren().size());
 
-            // Make sure the southwest corner is there and contains the new Body
+            // Make sure the southwest corner is there and contains the new com.github.eRedekopp.GravityModelDistribution.Body
             TestNode<Integer> sw = (TestNode<Integer>) root.getChildren().get(Quadrant.SOUTHWEST);
             assertEquals(masses[1], sw.getCentreMass().mass);
             assertEquals(xs[1], sw.getCentreMass().x);
@@ -239,7 +241,7 @@ public class NodeTest {
             assertEquals(1, sw.getCentreMass().value);
             assertEquals(0, sw.getChildren().size());
 
-            // Make sure the northwest corner is there and contains the original Body
+            // Make sure the northwest corner is there and contains the original com.github.eRedekopp.GravityModelDistribution.Body
             TestNode<Integer> nw = (TestNode<Integer>) root.getChildren().get(Quadrant.NORTHWEST);
             assertEquals(masses[0], nw.getCentreMass().mass);
             assertEquals(xs[0], nw.getCentreMass().x);
@@ -338,7 +340,7 @@ public class NodeTest {
             assertEquals(combinedCentreMassY, node.getCentreMass().y);
             assertEquals(2, node.getChildren().size());
 
-            // Check that the northeast node contains the original Body
+            // Check that the northeast node contains the original com.github.eRedekopp.GravityModelDistribution.Body
             TestNode<Integer> ne = (TestNode<Integer>) node.getChildren().get(Quadrant.NORTHEAST);
             assertEquals(masses[0], ne.getCentreMass().mass);
             assertEquals(0, ne.getCentreMass().value);
@@ -346,7 +348,7 @@ public class NodeTest {
             assertEquals(ys[0], ne.getCentreMass().y);
             assertEquals(0, ne.getChildren().size());
 
-            // Check that the southwest node contains the new Body
+            // Check that the southwest node contains the new com.github.eRedekopp.GravityModelDistribution.Body
             TestNode<Integer> sw = (TestNode<Integer>) node.getChildren().get(Quadrant.SOUTHWEST);
             assertEquals(masses[1], sw.getCentreMass().mass);
             assertEquals(1, sw.getCentreMass().value);
@@ -371,7 +373,7 @@ public class NodeTest {
             assertEquals(0, root.getCentreMass().value);
             assertEquals(0, root.getChildren().size());
 
-            // Add a new node in the northwest corner. This should result in the initial Body being
+            // Add a new node in the northwest corner. This should result in the initial com.github.eRedekopp.GravityModelDistribution.Body being
             // inserted into the northeast quadrant and the new one into the northwest quadrant
             root.insert(new Body2D<>(masses[1], -100, 100, 1));
             assertEquals(masses[0] + masses[1], root.getCentreMass().mass);

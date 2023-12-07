@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 /**
  * A Body2D object specifically for GIS coordinates. This gives a more accurate measure of the distance between
  * points using the Haversine formula, but comes at the cost of substantially increased computational cost due

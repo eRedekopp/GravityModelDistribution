@@ -1,3 +1,5 @@
+package com.github.eRedekopp.GravityModelDistribution;
+
 public interface GravityModelDistribution<T, B extends Body<T>> {
     /**
      * @param ref The reference point used to compute the weights of all bodies in the distribution
