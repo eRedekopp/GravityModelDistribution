@@ -13,10 +13,12 @@ The bodies need not represent physical bodies such as planetary bodies, but can 
 that has a location in real or abstract space, and some abstract concept of "mass". For example, the
 motivation for this code was selecting a random city where the "mass" is a city's population.
 
+GravityModelDistribution is a totally standalone Java application with no dependencies.
+
 ## Provided Implementations
 
-This repository includes only bodies in 2D space, and comes with two implementations of the GravityModelDistribution 
-interface. 
+This repository includes basic implementations of 2D and 3D bodies, as well as a special GIS body for precise calculations
+along the earth's surface. It also has two separate implementations of the GravityModelDistribution interface:
 
 SimpleGravityModelDistribution is a simple O(N) computation over all bodies, parallelized with Streams for quick execution. 
 This implementation could be easily extended by implementing a new Body type for your use case, such as computing the gravity
