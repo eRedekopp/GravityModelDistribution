@@ -3,7 +3,7 @@
 A Gravity Model probability distribution implementation in Java. The GravityModelDistribution is
 initialized by providing one or more bodies to consider. A body has an item which it represents, 
 a mass, and a spatial location in N-Dimensional space. Given a reference body at some location, the 
-GravityModelDistribution implements a weighted discrete random distribution over the bodies, where 
+GravityModelDistribution implements a [categorical probability distribution](https://en.wikipedia.org/wiki/Categorical_distribution) over the bodies, where 
 the weights for each body are determined by the amount of gravitational force they exert on the 
 reference body. If the reference point has an identical location to a body in the distribution
 (or if it simply is one of the bodies in the distribution), the body has a probability of 0 of 
@@ -33,7 +33,7 @@ recommended to avoid this implementation.
 ## Sample Code
 This code creates bodies on each corner of a square centred on (0, 0) with side length 10 with values of 0, 1, 2, and 3; 
 and masses of 0, 100, 200, and 300, respectively. It then queries the distribution for a point at the centre (0, 0). 
-The resulting distribution is a weighted discrete uniform distribution with probabilities [0, 1/6, 1/3, 1/2], but will change 
+The resulting distribution is a categorical distribution with probabilities [0, 1/6, 1/3, 1/2], but will change 
 if queried for a different point.
 
 ```
