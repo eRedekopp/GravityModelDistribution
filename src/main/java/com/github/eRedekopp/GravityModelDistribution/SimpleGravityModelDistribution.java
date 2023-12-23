@@ -9,10 +9,14 @@ public class SimpleGravityModelDistribution<T, B extends Body<T>> implements Gra
 
     private final Random rng;
 
-    public SimpleGravityModelDistribution(List<B> bodies) {
+    public SimpleGravityModelDistribution(List<B> bodies, Random rng) {
         if (bodies.isEmpty()) throw new IllegalArgumentException("No bodies");
         this.bodies = bodies;
-        this.rng = new Random();
+        this.rng = rng;
+    }
+
+    public SimpleGravityModelDistribution(List<B> bodies) {
+        this(bodies, new Random());
     }
 
     @Override

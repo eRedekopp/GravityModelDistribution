@@ -1,6 +1,7 @@
 package com.github.eRedekopp.GravityModelDistribution;
 
 import java.util.List;
+import java.util.Random;
 
 public class QuadtreeGravityModelDistribution<T> implements GravityModelDistribution<T, Body2D<T>> {
 
@@ -8,13 +9,16 @@ public class QuadtreeGravityModelDistribution<T> implements GravityModelDistribu
 
     private final double theta;
 
+    private final Random rng;
+
     /**
      * @param bodies The bodies to be inserted into the tree
      * @param theta The threshold value for when nodes are considered "far enough" to be considered as a combined
      *              unit rather than considering each body individually. Smaller theta is more accurate but more
      *              computationally intensive, and vice versa
+     * @param rng The random number generator to be used
      */
-    public QuadtreeGravityModelDistribution(List<Body2D<T>> bodies, double theta) {
+    public QuadtreeGravityModelDistribution(List<Body2D<T>> bodies, double theta, Random rng) {
         if (bodies.isEmpty()) {
             throw new IllegalArgumentException("No bodies");
         }
@@ -23,11 +27,16 @@ public class QuadtreeGravityModelDistribution<T> implements GravityModelDistribu
         }
 
         this.theta = theta;
+        this.rng = rng;
         Square bounds = this.getBoundingSquare(bodies);
-        this.root = new Node<>(bodies.get(0), bounds);
+        this.root = new Node<>(bodies.get(0), bounds, rng);
         for (Body2D<T> b: bodies.subList(1, bodies.size())) {
             this.root.insert(b);
         }
+    }
+
+    public QuadtreeGravityModelDistribution(List<Body2D<T>> bodies, double theta) {
+        this(bodies, theta, new Random());
     }
 
     @Override
