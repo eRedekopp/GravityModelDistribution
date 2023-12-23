@@ -17,8 +17,11 @@ GravityModelDistribution is a totally standalone Java application with no depend
 
 ## Provided Implementations
 
-This repository includes basic implementations of 2D and 3D bodies, as well as a special GIS body for precise calculations
-along the earth's surface. It also has two separate implementations of the GravityModelDistribution interface:
+This repository includes basic implementations of 1D, 2D, and 3D bodies, as well as a GIS body type that uses the 
+Haversine formula for precise distances along the earth's surface at the cost of increased computational demands.
+For each of these, there is also a convenience class called Simple[X]GravityModelDistribution to reduce the number 
+of type parameters compared to raw use of the class. It also has two separate implementations of the 
+GravityModelDistribution interface described below:
 
 SimpleGravityModelDistribution is a simple O(N) computation over all bodies, parallelized with Streams for quick execution. 
 This implementation could be easily extended by implementing a new Body type for your use case, such as computing the gravity
@@ -45,7 +48,7 @@ if queried for a different point.
                 new Body2D<>(300, -10, -10, 3)
         );
         Body2D<Integer> ref = new Body2D<>(1.0, 0, 0, null);
-        GravityModelDistribution<Integer, Body2D<Integer>> dist = new SimpleGravityModelDistribution<>(bodies);
+        Simple2DGravityModelDistribution<Integer> dist = new Simple2DGravityModelDistribution<>(bodies);
         Body2D<Integer> rand = dist.getRandomBody(ref);
     }
 ```
